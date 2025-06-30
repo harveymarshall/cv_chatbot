@@ -4,7 +4,7 @@ from app.llm_interface import answer_question
 from pydantic import BaseModel
 from typing import List
 
-CV_JSON_PATH = './app/cv_data/cv.json'
+CV_JSON_PATH = './app/cv_data/cv.pdf'
 
 app = FastAPI()
 
