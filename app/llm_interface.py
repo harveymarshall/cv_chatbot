@@ -1,21 +1,23 @@
 from .services.pdf_to_text import extract_pdf_text
+from .services.add_msg_to_history import add_msg_to_history
+from .services.create_safe_cv import create_safe_cv
 from langchain_openai import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema import HumanMessage, AIMessage
+from langchain.memory import ConversationBufferMemory
+
 
 def answer_question(question: str, pdf_path: str, history: list) -> str:
+    # Extract Text from PDF file
     cv_text = extract_pdf_text(pdf_path)
+    # Escape curly braces in CV text to avoid prompt template KeyError
+    safe_cv = create_safe_cv(cv_text)
+
+    # Initialise the LLM model
     llm = ChatOpenAI(model="gpt-4o")
     memory = ConversationBufferMemory(return_messages=True)
     # Load history into memory
-    for msg in history:
-        if msg["role"] == "user":
-            memory.chat_memory.add_message(HumanMessage(content=msg["content"]))
-        else:
-            memory.chat_memory.add_message(AIMessage(content=msg["content"]))
-    # Escape curly braces in CV text to avoid prompt template KeyError
-    safe_cv = str(cv_text).replace("{", "{{").replace("}", "}}")
+    add_msg_to_history(memory, history)
+
     system_msg = f"You're a helpful chatbot who answers questions about this CV (from PDF):\n{safe_cv}"
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_msg),
