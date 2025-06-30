@@ -1,4 +1,5 @@
 import os
+from app.services.create_safe_cv import create_safe_cv
 from langchain.memory import ConversationBufferMemory
 from app.services.pdf_to_text import extract_pdf_text
 from app.services.docx_to_pdf import docx_to_pdf
@@ -41,4 +42,9 @@ def test_add_msg_to_history():
     memory = ConversationBufferMemory(return_messages=True)
     add_msg_to_history(memory, history)
     assert memory.chat_memory.messages[0].content == "hello_world"
+
+def test_create_safe_cv():
+    txt = "This is a text string {}"
+    safe_txt = create_safe_cv(txt)
+    assert safe_txt == "This is a text string {{}}"
 
